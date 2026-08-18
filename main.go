@@ -63,7 +63,6 @@ func main() {
 		fmt.Sprintf("Terminal: %s", term),
 	)
 
-	// 4. Print everything out
 	PrintLogo(infoLines)
 }
 
