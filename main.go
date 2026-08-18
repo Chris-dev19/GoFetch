@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/shirou/gopsutil/disk"
 )
 
 // Core Function
@@ -29,24 +31,40 @@ func main() {
 	isgoInstalled        := IsGoInstalled()
 	term                 := GetTerm()
 
+	// 1. Initialize your info lines slice with the standard stats
 	infoLines := []string{
-		fmt.Sprintf("OS:            %s", operating_System),
-		fmt.Sprintf("Uptime:        %s", uptime),
-		fmt.Sprintf("CPU:           %s", cpu),
-		fmt.Sprintf("RAM:           %.1f/%.1fGB", usedGB, totalGB),
-		fmt.Sprintf("GPU:           %s", gpu),
-		fmt.Sprintf("Shell:         %s", shell),
-		fmt.Sprintf("Battery Level: %s%%", battery_level),
-		fmt.Sprintf("Status:        %s", battery_status),
-		fmt.Sprintf("Lang:          %s", lang),
-		fmt.Sprintf("Go Installed:  %v", isgoInstalled),
-		fmt.Sprintf("Terminal:      %s", term),
+		fmt.Sprintf("OS: %s", operating_System),
+		fmt.Sprintf("Uptime: %s", uptime),
+		fmt.Sprintf("CPU: %s", cpu),
+		fmt.Sprintf("RAM: %.1f/%.1fGB", usedGB, totalGB),
 	}
+
+	// 2. Fetch all disks and dynamically append each one to infoLines
+	disks, err := GetDisks()
+	if err == nil {
+		for _, d := range disks {
+			// Formats each drive nicely (e.g., "Disk [/]: 45.2/128.0GB (35.3%)")
+			diskLine := fmt.Sprintf("Disk [%s]: %.1f/%.1fGB (%.1f%%)",
+				d.Mountpoint, d.UsedGB, d.TotalGB, d.UsedPercent)
+			infoLines = append(infoLines, diskLine)
+		}
+	} else {
+		infoLines = append(infoLines, "Disk: Unknown")
+	}
+
+	// 3. Append the remaining system items
+	infoLines = append(infoLines,
+		fmt.Sprintf("GPU: %s", gpu),
+		fmt.Sprintf("Shell: %s", shell),
+		fmt.Sprintf("Battery Level: %s%%", battery_level),
+		fmt.Sprintf("Status: %s", battery_status),
+		fmt.Sprintf("Lang: %s", lang),
+		fmt.Sprintf("Go Installed: %v", isgoInstalled),
+		fmt.Sprintf("Terminal: %s", term),
+	)
 
 	PrintLogo(infoLines)
 }
-
-// GetOSRelease function declaration
 
 func GetOSRelease() string {
 	// OS Variable declaration
@@ -168,18 +186,18 @@ func GetGPU() string {
 			gpu_parts := strings.SplitN(gpu_line, ": ", 2)
 			if len(gpu_parts) == 2 {
 				gpu_line := gpu_parts[1]
-				if idx := strings.Index(gpu_line, "(rev"); idx != 1 {
+				// FIXED: Changed logic from idx != 1 to check for presence via != -1
+				if idx := strings.Index(gpu_line, "(rev"); idx != -1 {
 					gpu_line = gpu_line[:idx]
 					return strings.TrimSpace(gpu_line)
 				}
-
+				return strings.TrimSpace(gpu_line)
 			}
 		}
 	}
 	// Final Return
 
 	return "Unknown"
-
 }
 
 // GetShell function declaration
@@ -209,7 +227,6 @@ func GetBatteryLevel() string {
 	// Final Return
 
 	return battery_level_lines[0]
-
 }
 
 // GetBatteryStatus function declaration
@@ -251,11 +268,12 @@ func GetLocale() string {
 
 // IsGoInstalled function declaration
 
-func IsGoInstalled() bool {
+func IsGoInstalled() string {
 	_, err := exec.LookPath("go")
-	// Final return
-
-	return err == nil
+	if err == nil {
+		return "Yes"
+	}
+	return "No"
 }
 
 // GetTerm function declaration
@@ -267,4 +285,63 @@ func GetTerm() string {
 		return "Unknown"
 	}
 	return term
+}
+
+type DiskInfo struct {
+	Mountpoint  string
+	TotalGB     float64
+	UsedGB      float64
+	FreeGB      float64
+	UsedPercent float64
+}
+
+func GetDisks() ([]DiskInfo, error) {
+	const bytesInGB = 1024 * 1024 * 1024
+	partitions, err := disk.Partitions(false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var diskList []DiskInfo
+
+	for _, partition := range partitions {
+		isReadOnly := false
+		for _, opt := range strings.Split(partition.Opts, ",") {
+			if opt == "ro" {
+				isReadOnly = true
+				break
+			}
+		}
+		if isReadOnly {
+			continue
+		}
+
+		if strings.HasPrefix(partition.Mountpoint, "/nix/store") {
+			continue
+		}
+
+		usage, err := disk.Usage(partition.Mountpoint)
+		if err != nil {
+			continue
+		}
+
+		totalGB := float64(usage.Total) / bytesInGB
+		usedGB := float64(usage.Used) / bytesInGB
+		freeGB := float64(usage.Free) / bytesInGB
+
+		if totalGB < 2.0 {
+			continue
+		}
+
+		diskList = append(diskList, DiskInfo{
+			Mountpoint:  partition.Mountpoint,
+			TotalGB:     totalGB,
+			UsedGB:      usedGB,
+			FreeGB:      freeGB,
+			UsedPercent: usage.UsedPercent,
+		})
+	}
+
+	return diskList, nil
 }
