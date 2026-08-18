@@ -17,7 +17,7 @@ To install gofetch onto your system, you can follow these steps:
 
 or all commands in one:
 
-`git clone https://github.com/Chris-dev19/GoFetch; cd GoFetch; go build -o gofetch; mkdir -p ~/.local/bin/; mv gofetch ~/.local/bin/`
+`git clone https://github.com/Chris-dev19/GoFetch; cd GoFetch; chmod +x install.sh; ./install.sh`
 
 ## Usage
 
