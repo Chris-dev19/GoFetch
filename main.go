@@ -14,33 +14,33 @@ import (
 
 // Core Function
 func main() {
-	operating_System := GetOSRelease()
-	uptime, _ := GetUptime()
-	cpu := GetCPU()
+	operating_System     := GetOSRelease()
+	uptime, _            := GetUptime()
+	cpu                  := GetCPU()
 	totalKB, availableKB := GetMem()
-	usedKB := totalKB - availableKB
-	totalGB := float64(totalKB) / 1024 / 1024
-	usedGB := float64(usedKB) / 1024 / 1024
-	gpu := GetGPU()
-	shell := GetShell()
-	battery_level := GetBatteryLevel()
-	battery_status := GetBatteryStatus()
-	lang := GetLocale()
-	isgoInstalled := IsGoInstalled()
-	term := GetTerm()
+	usedKB               := totalKB - availableKB
+	totalGB              := float64(totalKB) / 1024 / 1024
+	usedGB               := float64(usedKB) / 1024 / 1024
+	gpu                  := GetGPU()
+	shell                := GetShell()
+	battery_level        := GetBatteryLevel()
+	battery_status       := GetBatteryStatus()
+	lang                 := GetLocale()
+	isgoInstalled        := IsGoInstalled()
+	term                 := GetTerm()
 
 	infoLines := []string{
-		fmt.Sprintf("OS: %s", operating_System),
-		fmt.Sprintf("Uptime: %s", uptime),
-		fmt.Sprintf("CPU: %s", cpu),
-		fmt.Sprintf("RAM: %.1f/%.1fGB", usedGB, totalGB),
-		fmt.Sprintf("GPU: %s", gpu),
-		fmt.Sprintf("Shell: %s", shell),
+		fmt.Sprintf("OS:            %s", operating_System),
+		fmt.Sprintf("Uptime:        %s", uptime),
+		fmt.Sprintf("CPU:           %s", cpu),
+		fmt.Sprintf("RAM:           %.1f/%.1fGB", usedGB, totalGB),
+		fmt.Sprintf("GPU:           %s", gpu),
+		fmt.Sprintf("Shell:         %s", shell),
 		fmt.Sprintf("Battery Level: %s%%", battery_level),
-		fmt.Sprintf("Status: %s", battery_status),
-		fmt.Sprintf("Lang: %s", lang),
-		fmt.Sprintf("Go Installed: %v", isgoInstalled),
-		fmt.Sprintf("Terminal: %s", term),
+		fmt.Sprintf("Status:        %s", battery_status),
+		fmt.Sprintf("Lang:          %s", lang),
+		fmt.Sprintf("Go Installed:  %v", isgoInstalled),
+		fmt.Sprintf("Terminal:      %s", term),
 	}
 
 	PrintLogo(infoLines)
