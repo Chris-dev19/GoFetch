@@ -25,7 +25,7 @@ const (
 )
 
 func PrintLogo(infoLines []string) {
-	logoLines := strings.Split(logo[0], "\n")
+	logoLines := strings.Split(logo, "\n")
 
 	for i, line := range logoLines {
 		info := ""
