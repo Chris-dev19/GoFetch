@@ -1,5 +1,5 @@
 # GoFetch
-![GoFetch-logo](images/GoFetch-logo) 
+![GoFetch-logo](images/GoFetch-logo.png) 
 This is a very simple program to display system information in a beautiful way.
 
 ## Dependencies
