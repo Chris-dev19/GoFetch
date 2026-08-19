@@ -25,3 +25,6 @@ To run it, make sure ~/.local/bin/ has been added to your $PATH (e.g. in your .b
 
 `$ gofetch`
 
+## Preview
+
+![GoFetch Preview](images/GoFetch-Preview.png) 
