@@ -1,7 +1,5 @@
 package main
 
-// Needed Imports
-
 import (
 	"fmt"
 	"os"
@@ -14,7 +12,6 @@ import (
 	"github.com/shirou/gopsutil/disk"
 )
 
-// Core Function
 func main() {
 	operating_System     := GetOSRelease()
 	uptime, _            := GetUptime()
@@ -31,7 +28,6 @@ func main() {
 	isgoInstalled        := IsGoInstalled()
 	term                 := GetTerm()
 
-	// 1. Initialize your info lines slice with the standard stats
 	infoLines := []string{
 		fmt.Sprintf("OS: %s", operating_System),
 		fmt.Sprintf("Uptime: %s", uptime),
@@ -39,11 +35,9 @@ func main() {
 		fmt.Sprintf("RAM: %.1f/%.1fGB", usedGB, totalGB),
 	}
 
-	// 2. Fetch all disks and dynamically append each one to infoLines
 	disks, err := GetDisks()
 	if err == nil {
 		for _, d := range disks {
-			// Formats each drive nicely (e.g., "Disk [/]: 45.2/128.0GB (35.3%)")
 			diskLine := fmt.Sprintf("Disk [%s]: %.1f/%.1fGB (%.1f%%)",
 				d.Mountpoint, d.UsedGB, d.TotalGB, d.UsedPercent)
 			infoLines = append(infoLines, diskLine)
@@ -52,7 +46,6 @@ func main() {
 		infoLines = append(infoLines, "Disk: Unknown")
 	}
 
-	// 3. Append the remaining system items
 	infoLines = append(infoLines,
 		fmt.Sprintf("GPU: %s", gpu),
 		fmt.Sprintf("Shell: %s", shell),
@@ -67,15 +60,10 @@ func main() {
 }
 
 func GetOSRelease() string {
-	// OS Variable declaration
-
 	osname, err := os.ReadFile("/etc/os-release")
-	// Error handling
-
 	if err != nil {
 		return "Unknown"
 	}
-	// Triming OS name variables
 
 	osname_new_lines := strings.Split(string(osname), "\n")
 
@@ -87,37 +75,26 @@ func GetOSRelease() string {
 	return "Unknown"
 }
 
-// GetUptime function declaration
-
 func GetUptime() (time.Duration, error) {
-	// Uptime variables declarations
-
 	timeup, err := os.ReadFile("/proc/uptime")
 	if err != nil {
 		return 0, err
 	}
-	// Parsing timeup to Float64
 
 	timeup_improved := strings.Fields(string(timeup))
 	seconds, err := strconv.ParseFloat(timeup_improved[0], 64)
 	if err != nil {
 		return 0, err
 	}
-	// Return Result
 
 	return time.Duration(seconds) * time.Second, nil
 }
 
-// GetCPU function declarations
-
 func GetCPU() string {
-	// CpuiInfo variable declaration
-
 	cpuinfo, err := os.ReadFile("/proc/cpuinfo")
 	if err != nil {
 		return "Unknown"
 	}
-	// Triming Cpuinfos
 
 	cpu_infos_lines := strings.Split(string(cpuinfo), "\n")
 
@@ -127,21 +104,15 @@ func GetCPU() string {
 			return strings.TrimSpace(model_parts[1])
 		}
 	}
-	// Final Return
 
 	return "Unknown"
 }
 
-// GetMem function declaration
-
 func GetMem() (uint64, uint64) {
-	// Memory variable declaration
-
 	memory, err := os.ReadFile("/proc/meminfo")
 	if err != nil {
 		return 0, 0
 	}
-	// Parsing memory
 
 	memory_lines := strings.Split(string(memory), "\n")
 	var TotalKB, availableKB uint64
@@ -162,21 +133,15 @@ func GetMem() (uint64, uint64) {
 			availableKB = mem_value
 		}
 	}
-	// Final return
 
 	return TotalKB, availableKB
 }
 
-// GPU function declaration
-
 func GetGPU() string {
-	// GPU variable declaration
-
 	gpu, err := exec.Command("lspci").Output()
 	if err != nil {
 		return "Unknown"
 	}
-	// Searching for VGA Options...
 
 	gpu_lines := strings.Split(string(gpu), "\n")
 
@@ -186,7 +151,6 @@ func GetGPU() string {
 			gpu_parts := strings.SplitN(gpu_line, ": ", 2)
 			if len(gpu_parts) == 2 {
 				gpu_line := gpu_parts[1]
-				// FIXED: Changed logic from idx != 1 to check for presence via != -1
 				if idx := strings.Index(gpu_line, "(rev"); idx != -1 {
 					gpu_line = gpu_line[:idx]
 					return strings.TrimSpace(gpu_line)
@@ -195,61 +159,41 @@ func GetGPU() string {
 			}
 		}
 	}
-	// Final Return
 
 	return "Unknown"
 }
 
-// GetShell function declaration
-
 func GetShell() string {
-	// Shell Path variable declaration
-
 	shellPath := os.Getenv("SHELL")
 	if shellPath == "" {
 		return "Unknown"
 	}
-	// Final Return
 	return filepath.Base(shellPath)
 }
 
-// GetBatteryLevel function declaration
-
 func GetBatteryLevel() string {
-	// Battery Level variable declaration
-
 	battery_level, err := os.ReadFile("/sys/class/power_supply/BAT0/capacity")
 	if err != nil {
 		return "Unknown"
 	}
 
 	battery_level_lines := strings.Split(string(battery_level), "\n")
-	// Final Return
 
 	return battery_level_lines[0]
 }
 
-// GetBatteryStatus function declaration
-
 func GetBatteryStatus() string {
-	// Battery Status variable declaration
-
 	battery_status, err := os.ReadFile("/sys/class/power_supply/BAT0/status")
 	if err != nil {
 		return "Unknown"
 	}
 
 	battery_status_lines := strings.Split(string(battery_status), "\n")
-	// Final Return
 
 	return battery_status_lines[0]
 }
 
-// GetLocale function declaration
-
 func GetLocale() string {
-	// Locale variable declaration
-
 	locale, err := exec.Command("locale").Output()
 	if err != nil {
 		return "Unknown"
@@ -261,12 +205,9 @@ func GetLocale() string {
 			return strings.Trim(strings.TrimPrefix(locale_line, "LANG="), `"`)
 		}
 	}
-	// Final Return
 
 	return "Unknown"
 }
-
-// IsGoInstalled function declaration
 
 func IsGoInstalled() string {
 	_, err := exec.LookPath("go")
@@ -276,10 +217,7 @@ func IsGoInstalled() string {
 	return "No"
 }
 
-// GetTerm function declaration
-
 func GetTerm() string {
-	// Term variable declaration
 	term := os.Getenv("TERM")
 	if term == "" {
 		return "Unknown"
