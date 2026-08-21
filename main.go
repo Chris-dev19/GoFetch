@@ -13,20 +13,20 @@ import (
 )
 
 func main() {
-	operating_System     := GetOSRelease()
-	uptime, _            := GetUptime()
-	cpu                  := GetCPU()
+	operating_System := GetOSRelease()
+	uptime, _ := GetUptime()
+	cpu := GetCPU()
 	totalKB, availableKB := GetMem()
-	usedKB               := totalKB - availableKB
-	totalGB              := float64(totalKB) / 1024 / 1024
-	usedGB               := float64(usedKB) / 1024 / 1024
-	gpu                  := GetGPU()
-	shell                := GetShell()
-	battery_level        := GetBatteryLevel()
-	battery_status       := GetBatteryStatus()
-	lang                 := GetLocale()
-	isgoInstalled        := IsGoInstalled()
-	term                 := GetTerm()
+	usedKB := totalKB - availableKB
+	totalGB := float64(totalKB) / 1024 / 1024
+	usedGB := float64(usedKB) / 1024 / 1024
+	gpu := GetGPU()
+	shell := GetShell()
+	battery_level := GetBatteryLevel()
+	battery_status := GetBatteryStatus()
+	lang := GetLocale()
+	isgoInstalled := IsGoInstalled()
+	term := GetTerm()
 
 	infoLines := []string{
 		fmt.Sprintf("OS: %s", operating_System),
